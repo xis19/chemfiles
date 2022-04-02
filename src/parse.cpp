@@ -15,6 +15,18 @@
 
 using namespace chemfiles;
 
+namespace {
+
+/// Skips the spaces, until reaching the first non-whitespace charater or end of string
+void skip_white_spaces(decltype(std::declval<string_view>().begin())& iter,
+                         decltype(std::declval<string_view>().end()) end) {
+    while(iter != end && is_ascii_whitespace(*iter)) {
+        ++iter;
+    }
+}
+
+}   // anonymous namespace
+
 template <> int64_t chemfiles::parse(string_view input) {
     if (input.empty()) {
         throw error("can not parse an integer from an empty string");
@@ -24,9 +36,7 @@ template <> int64_t chemfiles::parse(string_view input) {
     auto end = input.end();
 
     // skip whitespaces before number
-    while (it != end && is_ascii_whitespace(*it)) {
-        it++;
-    }
+    skip_white_spaces(it, end);
 
     int sign = 1;
     // Parse sign, if any
@@ -63,9 +73,7 @@ template <> int64_t chemfiles::parse(string_view input) {
     }
 
     // skip whitespaces after number if any
-    while (it != end && is_ascii_whitespace(*it)) {
-        it++;
-    }
+    skip_white_spaces(it, end);
 
     if (it != end) {
         throw error("can not parse '{}' as an integer", input);
@@ -83,9 +91,7 @@ template <> uint64_t chemfiles::parse(string_view input) {
     auto end = input.end();
 
     // skip whitespaces before number
-    while (it != end && is_ascii_whitespace(*it)) {
-        it++;
-    }
+    skip_white_spaces(it, end);
 
     // Parse sign, if any
     if (it != end && *it == '+') {
@@ -109,9 +115,7 @@ template <> uint64_t chemfiles::parse(string_view input) {
     }
 
     // skip whitespaces after number if any
-    while (it != end && is_ascii_whitespace(*it)) {
-        it++;
-    }
+    skip_white_spaces(it, end);
 
     if (it != end) {
         throw error("can not parse '{}' as a positive integer", input);
@@ -130,9 +134,7 @@ template <> double chemfiles::parse(string_view input) {
     auto end = input.end();
 
     // skip whitespaces before number
-    while (it != end && is_ascii_whitespace(*it)) {
-        it++;
-    }
+    skip_white_spaces(it, end);
 
     // Get sign, if any.
     int sign = 1.0;
@@ -207,9 +209,7 @@ template <> double chemfiles::parse(string_view input) {
     }
 
     // skip whitespaces after number if any
-    while (it != end && is_ascii_whitespace(*it)) {
-        it++;
-    }
+    skip_white_spaces(it, end);
 
     if (it != end || !got_digits) {
         throw error("can not parse '{}' as a double", input);
