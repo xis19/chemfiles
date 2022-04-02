@@ -219,6 +219,60 @@ template <> double chemfiles::parse(string_view input) {
     return sign * (frac ? (value / scale) : (value * scale));
 }
 
+namespace {
+
+const std::string TRUES[] = {"t", ".true.", ".t", "1"};
+const std::string FALSES[] = {"f", ".false.", ".f", "0"};
+
+} // anonymous namespace
+
+template<> bool chemfiles::parse(string_view input) {
+    if (input.empty()) {
+        throw error("cannot parse a boolean from an empty string");
+    }
+
+    auto it = input.begin();
+    const auto end = input.end();
+
+    skip_white_spaces(it, end);
+
+    std::string bool_string;
+    while(it != end && !is_ascii_whitespace(*it)) {
+        bool_string.push_back(to_ascii_lowercase(*it++));
+    }
+
+    bool match = false;
+    bool retval = false;
+    for(const auto& true_str : TRUES) {
+        if (bool_string == true_str) {
+            match = true;
+            retval = true;
+            break;
+        }
+    }
+    if (!match) {
+        for(const auto& false_str : FALSES) {
+            if (bool_string == false_str) {
+                match = true;
+                retval = false;
+            break;
+            }
+        }
+    }
+
+    if (!match) {
+        throw error("unknown true/false string: {}", bool_string);
+    }
+
+    skip_white_spaces(it, end);
+
+    if (it != end) {
+        throw error("extra text: {}", input);
+    }
+
+    return retval;
+}
+
 static const auto digits_upper = std::string("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 static const auto digits_lower = std::string("0123456789abcdefghijklmnopqrstuvwxyz");
 

@@ -132,7 +132,7 @@ inline T parse(string_view input) {
     return detail::parse_integer<T>(input);
 }
 
-/// Read a string value from the `input`. This function directly returns its
+/// Reads a string value from the `input`. This function directly returns its
 /// input.
 ///
 /// @throw chemfiles::Error if the input is empty
@@ -143,7 +143,7 @@ template<> inline std::string parse(string_view input) {
     return input.to_string();
 }
 
-/// Read double value from the `input`. This only support plain numbers (no
+/// Reads double value from the `input`. This only supports plain numbers (no
 /// hex or octal notation), with ASCII digits (the system locale is ignored).
 /// This does not support parsing NaN or infinity doubles, since they don't
 /// have much interest in chemfiles;
@@ -154,7 +154,7 @@ template<> inline std::string parse(string_view input) {
 ///                         after the value
 template<> double parse(string_view input);
 
-/// Read a signed 64-bit integer from the `input`. This only support plain
+/// Reads a signed 64-bit integer from the `input`. This only supports plain
 /// numbers (no hex or octal notation), with ASCII digits (the system locale is
 /// ignored). Numbers should follow the `(+|-)?\d+` pattern.
 ///
@@ -163,7 +163,7 @@ template<> double parse(string_view input);
 ///                         after the value
 template<> int64_t parse(string_view input);
 
-/// Read an unsigned 64-bit integer from the `input`. This only support plain
+/// Reads an unsigned 64-bit integer from the `input`. This only supports plain
 /// numbers (no hex or octal notation), with ASCII digits (the system locale is
 /// ignored). Numbers should follow the `+?\d+` pattern.
 ///
@@ -171,6 +171,15 @@ template<> int64_t parse(string_view input);
 ///                         overflow `uint64_t`, or if their is additional data
 ///                         after the value
 template<> uint64_t parse(string_view input);
+
+/// Reads a boolean value from the `input`.
+///     t, .true., .t, 1 are interpreted as true;
+///     f, .false., .f, 0 are interperted as false
+/// The matching is case insensitive.
+///
+/// @throw chemfiles::Error if the input is empty, the context is not known or
+///                         additional data after the value
+template<> bool parse(string_view input);
 
 template<typename ...Args>
 inline size_t scan(string_view input, Args& ...args) {

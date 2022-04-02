@@ -180,6 +180,45 @@ TEST_CASE("String parsing") {
             "tried to read a string, got an empty value"
         );
     }
+
+    SECTION("bool") {
+        // Standard True check
+        CHECK(chemfiles::parse<bool>("T") == true);
+        CHECK(chemfiles::parse<bool>("t") == true);
+        CHECK(chemfiles::parse<bool>(".TRUE.") == true);
+        CHECK(chemfiles::parse<bool>(".TrUe.") == true);
+        CHECK(chemfiles::parse<bool>(".true.") == true);
+        CHECK(chemfiles::parse<bool>(".T") == true);
+        CHECK(chemfiles::parse<bool>(".t") == true);
+        CHECK(chemfiles::parse<bool>("1") == true);
+
+        // Standard False check
+        CHECK(chemfiles::parse<bool>("F") == false);
+        CHECK(chemfiles::parse<bool>("f") == false);
+        CHECK(chemfiles::parse<bool>(".FALSE.") == false);
+        CHECK(chemfiles::parse<bool>(".FaLsE.") == false);
+        CHECK(chemfiles::parse<bool>(".false.") == false);
+        CHECK(chemfiles::parse<bool>(".F") == false);
+        CHECK(chemfiles::parse<bool>(".f") == false);
+        CHECK(chemfiles::parse<bool>("0") == false);
+
+        // Spacing check
+        CHECK(chemfiles::parse<bool>("  0  ") == false);
+
+        // Problematics
+        CHECK_THROWS_WITH(
+            chemfiles::parse<bool>(""),
+            "cannot parse a boolean from an empty string"
+        );
+        CHECK_THROWS_WITH(
+            chemfiles::parse<bool>("bad"),
+            "unknown true/false string: bad"
+        );
+        CHECK_THROWS_WITH(
+            chemfiles::parse<bool>("t extra text"),
+            "extra text: t extra text"
+        );
+    }
 }
 
 TEST_CASE("scan") {
