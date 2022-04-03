@@ -73,7 +73,7 @@ namespace detail {
         }
 
         /// Get the next non-whitespace value. If all values have been read,
-        /// this returns an empty string.
+        /// throws an Error
         string_view next() {
             auto start = input_.begin();
             auto end = input_.end();
@@ -191,6 +191,15 @@ inline size_t scan(string_view input, Args& ...args) {
     }
     return iterator.read_count();
 }
+
+/// Splits a string by whitespaces, e.g.
+///
+///   " aa  bbb  c_d e"
+///
+/// will be split into
+///
+///   {"aa", "bbb", "c_d", "e"}
+std::vector<string_view> split_string(string_view input);
 
 /// Encodes an integer using the [hybrid36] encoding scheme. Returns a string
 /// of `*` characters if the integer is out of range.

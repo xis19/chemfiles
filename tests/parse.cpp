@@ -221,6 +221,27 @@ TEST_CASE("String parsing") {
     }
 }
 
+TEST_CASE("split_string") {
+    using chemfiles::string_view;
+    auto compare = [](const std::vector<string_view>& v1,
+                      const std::vector<string_view>& v2) -> bool {
+        if (v1.size() != v2.size()) {
+            return false;
+        }
+        const auto size = v1.size();
+        for(int i = 0; i < size; ++i) {
+            if (v1[i] != v2[i]) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    CHECK(compare(chemfiles::split_string("  a b c d "), {"a", "b", "c", "d"}));
+    CHECK(compare(chemfiles::split_string(" 1 3"), {"1", "3"}));
+    CHECK(compare(chemfiles::split_string(" "), {}));
+}
+
 TEST_CASE("scan") {
     int i = 0;
     double d = 0;

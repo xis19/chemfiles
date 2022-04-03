@@ -273,6 +273,24 @@ template<> bool chemfiles::parse(string_view input) {
     return retval;
 }
 
+std::vector<string_view> chemfiles::split_string(string_view input) {
+    std::vector<string_view> result;
+    detail::tokens_iterator iter(input);
+    auto get_text = [&iter]() -> string_view {
+        try {
+            return iter.next();
+        } catch(const Error& err) {
+            return "";
+        }
+    };
+    string_view current = get_text();
+    while(!current.empty()) {
+        result.push_back(current);
+        current = get_text();
+    }
+    return result;
+}
+
 static const auto digits_upper = std::string("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 static const auto digits_lower = std::string("0123456789abcdefghijklmnopqrstuvwxyz");
 
