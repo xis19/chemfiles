@@ -1,5 +1,5 @@
 # Update this value if you need to update the data file set
-set(TESTS_DATA_GIT "8a1a48e368bc0f9611fcf8c153b3230cf5f51f8b")
+set(TESTS_DATA_GIT "939f5dccaa8ce848b390be268b62775a2a9bf770")
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/data/${TESTS_DATA_GIT}")
     message(STATUS "Downloading test data files")
@@ -7,7 +7,7 @@ if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/data/${TESTS_DATA_GIT}")
         "https://github.com/chemfiles/tests-data/archive/${TESTS_DATA_GIT}.tar.gz"
         "${CMAKE_CURRENT_BINARY_DIR}/${TESTS_DATA_GIT}.tar.gz"
         SHOW_PROGRESS
-        EXPECTED_HASH SHA1=dcfb388b4ec6544c94b3b63aa7cb32d7dddbe7b9
+        EXPECTED_HASH SHA1=a8d8b4f58a3a00d8b60fd1670fb4c72e8f093573
     )
 
     message(STATUS "Unpacking test data files")
@@ -77,6 +77,8 @@ function(chfl_define_test _name_)
     endif()
 endfunction()
 
+find_package(Threads REQUIRED)
+
 function(chfl_unit_test _name_ _file_)
     add_executable(${_name_} ${_file_} ${CHEMFILES_OBJECTS})
     # We need to pretend we are inside the DLL to access all functions
@@ -84,6 +86,13 @@ function(chfl_unit_test _name_ _file_)
     target_link_libraries(${_name_} $<TARGET_PROPERTY:chemfiles,LINK_LIBRARIES>)
     set_target_properties(${_name_} PROPERTIES LINKER_LANGUAGE CXX)
     target_include_directories(${_name_} SYSTEM PRIVATE ${EXTERNAL_INCLUDES})
+
+    if(THREADS_HAVE_PTHREAD_ARG)
+        target_compile_options(${_name_} PUBLIC "-pthread")
+    endif()
+    if(CMAKE_THREAD_LIBS_INIT)
+        target_link_libraries(${_name_} "${CMAKE_THREAD_LIBS_INIT}")
+    endif()
 
     chfl_define_test(${_name_})
 endfunction()
@@ -117,8 +126,10 @@ foreach(test_file IN LISTS capi_test_files)
     chfl_capi_test(${test_file})
 endforeach()
 
+# Pass extra data to some tests
 file(RELATIVE_PATH VERSION_FILE_PATH ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/VERSION)
 target_compile_definitions(c-misc PRIVATE "-DVERSION_FILE_PATH=\"${VERSION_FILE_PATH}\"")
+target_compile_definitions(netcdf3-file PRIVATE "-DCMAKE_COMMAND=\"${CMAKE_COMMAND}\"")
 
 function(chfl_doctest _name_ _file_)
     if(NOT ${CHFL_BUILD_DOCTESTS})
@@ -135,7 +146,7 @@ function(chfl_doctest _name_ _file_)
 
     add_executable(${_name_} ${_file_})
     target_link_libraries(${_name_} chemfiles)
-    target_link_libraries(${_name_} ${NETCDF_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARY})
+    target_link_libraries(${_name_} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARY})
     set_target_properties(${_name_} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${_name_} PROPERTIES COMPILE_FLAGS "-UNDEBUG")
     target_include_directories(${_name_} SYSTEM PRIVATE ${EXTERNAL_INCLUDES})
@@ -187,40 +198,6 @@ file(GLOB_RECURSE capi_doctest_files ${CMAKE_CURRENT_SOURCE_DIR}/doc/capi/**.c)
 foreach(test_file IN LISTS capi_doctest_files)
     chfl_c_doctest(${test_file})
 endforeach()
-
-# Write sample configuration files for tests
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/../.chemfiles.toml
-"[types]
-Oh = \"O\"
-Oz = \"O\"
-N2 = \"N\"
-
-[atoms.CH3]
-mass = 15.0
-charge = 0
-full_name = \"methyl\"
-
-[atoms.Zn]
-charge = 1.8
-
-[atoms.SO4]
-mass = 96.0
-charge = -2
-full_name = \"sulfate\"
-vdw_radius = 3.68
-covalent_radius = 2.42
-")
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/chemfiles.toml
-"[types]
-# This override the root .chemfiles.toml file
-N2 = \"N4\"
-")
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/local-file.toml
-"[types]
-Oz = \"F\"
-")
 
 # Code linting with Python scripts
 if(${CMAKE_VERSION} VERSION_GREATER "3.12")

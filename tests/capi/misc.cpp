@@ -1,7 +1,6 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) Guillaume Fraux and contributors -- BSD license
 
-#include <fstream>
 #include <sstream>
 #include <cstring>
 
@@ -25,21 +24,33 @@ TEST_CASE("Errors") {
     CHECK(chfl_last_error() == std::string(""));
 }
 
-TEST_CASE("Configuration") {
-    CHECK_STATUS(chfl_add_configuration("local-file.toml"));
-    CHECK(chfl_add_configuration("not-there") == CHFL_CONFIGURATION_ERROR);
+TEST_CASE("Version") {
+    auto version = read_text_file(VERSION_FILE_PATH);
+
+    // Remove trailling [\r]\n
+    version = version.substr(0, version.length() - 1);
+    if (version[version.length() - 1] == '\r') {
+        version = version.substr(0, version.length() - 1);
+    }
+
+    CHECK(chfl_version() == version);
 }
 
-TEST_CASE("Version") {
-    std::ifstream file(VERSION_FILE_PATH);
-    REQUIRE(file.is_open());
-    std::stringstream content;
-    content << file.rdbuf();
-    file.close();
+TEST_CASE("Guess format") {
+    char format[256] = {0};
+    CHECK_STATUS(chfl_guess_format("filename.nc", format, sizeof(format)));
+    CHECK(format == std::string("Amber NetCDF"));
 
-    // Remove trailling \n
-    std::string version = content.str().substr(0, content.str().length() - 1);
-    CHECK(chfl_version() == version);
+    CHECK_STATUS(chfl_guess_format("filename.xyz.gz", format, sizeof(format)));
+    CHECK(format == std::string("XYZ / GZ"));
+
+    // buffer too small for the format
+    chfl_status status = chfl_guess_format("filename.nc", format, 8);
+    CHECK(status == CHFL_MEMORY_ERROR);
+
+    // no associated format
+    status = chfl_guess_format("filename.not-there", format, 8);
+    CHECK(status == CHFL_FORMAT_ERROR);
 }
 
 // Global variables for access from callback and main

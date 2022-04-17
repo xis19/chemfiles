@@ -7,10 +7,12 @@
 
 int main() {
     // [example]
-    chfl_add_configuration("local-file.toml");
+    char format[256] = {0};
+    chfl_guess_format("filename.nc", format, sizeof(format));
+    assert(strcmp(format, "Amber NetCDF") == 0);
 
-    // reading a frame will now use atom names from the configuration
-    // ...
+    chfl_guess_format("filename.xyz.gz", format, sizeof(format));
+    assert(strcmp(format, "XYZ / GZ") == 0);
     // [example]
     return 0;
 }

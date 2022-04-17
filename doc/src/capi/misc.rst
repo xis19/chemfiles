@@ -17,6 +17,8 @@ chemfiles types); all the functions return a status code from the
 Format list and Metadata
 ------------------------
 
+.. doxygenfunction:: chfl_guess_format
+
 .. doxygenfunction:: chfl_formats_list
 
 .. doxygenstruct:: chfl_format_metadata
@@ -34,11 +36,3 @@ it a callback function to be called on each warning event.
 .. doxygentypedef:: chfl_warning_callback
 
 .. doxygenfunction:: chfl_set_warning_callback
-
-Configuration files
--------------------
-
-You can add more :ref:`configuration <configuration>` file to chemfiles with
-:cpp:func:`chfl_add_configuration`.
-
-.. doxygenfunction:: chfl_add_configuration

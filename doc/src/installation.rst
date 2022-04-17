@@ -1,26 +1,26 @@
 Installation
 ============
 
-Pre-compiled binaries
-^^^^^^^^^^^^^^^^^^^^^
+.. note::
 
-We provide compiled packages of the latest release for muliple Linux
-distributions using the `OpenSUSE build service`_. The name of packages
-you can install this way follow the usual linux naming scheme:
+    This page describe the different installation methods for the C and C++
+    interfaces to chemfiles. If you want to use chemfiles from a different
+    language, please see the corresponding pages:
 
-- ``chemfiles`` package only contains the shared library ``libchemfiles.so.x.y``
-- ``chemfiles-static`` contains the static library ``libchemfiles.a``
-- ``chemfiles-dev`` (for Debian and derivatives) or ``chemfiles-devel``
-  (for CentOS and derivatives) contains the files usefull for
-  development, including cmake configuration and the C and C++ headers.
+    - Python: https://chemfiles.org/chemfiles.py/latest/
+    - Julia: https://chemfiles.org/Chemfiles.jl/latest/
+    - Rust: https://chemfiles.org/chemfiles.rs/latest/
+    - Fortran: https://chemfiles.org/chemfiles.f03/latest/
 
-.. raw:: html
-    <p>You can download them directly below:</p>
+Pre-compiled chemfiles
+^^^^^^^^^^^^^^^^^^^^^^
 
-    <iframe
-        src="https://software.opensuse.org/download/package.iframe?project=home%3ALuthaf&package=chemfiles"
-        width="100%" height="400px" frameborder="0"
-    ></iframe>
+We provide pre-compiled version of chemfiles (both a static library build and a
+shared library build) on github. Please look for the version you need on the
+`chemfiles/chemfiles-prebuilt
+<https://github.com/chemfiles/chemfiles-prebuilt/releases>`_ repository.
+
+--------------------------------------------------------------------------------
 
 We also provide three `conda`_ packages in the `conda-forge` community channel for
 Linux and Os X.
@@ -47,16 +47,16 @@ Linux and Os X.
 Building from sources
 ^^^^^^^^^^^^^^^^^^^^^
 
-Provided you have all the required depenencies, you can also build chemfiles
+Provided you have all the required dependencies, you can also build chemfiles
 from sources.
 
 Core library dependencies
 -------------------------
 
 In order to build the core library, you will need a C++11 capable compiler.
-Chemfiles is automatically tested agaist GCC (>= 4.8) on Linux, OSX and Windows
+Chemfiles is automatically tested against GCC (>= 4.8) on Linux, OSX and Windows
 (mingw-w64); clang (>= 3.3) on Linux and OS X and MSCV 14 on Windows. It was
-also compiled sucessfuly with Intel C++ compilers. Please report any sucessful
+also compiled successfully with Intel C++ compilers. Please report any successful
 compilation with other compilers! Chemfiles also uses the `CMake`_ build system,
 which is available in all the package managers.
 
@@ -108,7 +108,7 @@ Build steps
 
 You can get the source code from either git, or from the `release`_ page of
 Github. In the later case, just unpack the archive wherever you want the source
-code to live. To get the latest developpement version, use git:
+code to live. To get the latest development version, use git:
 
 .. code-block:: bash
 
@@ -142,7 +142,7 @@ most important options:
 |                                       |                     | to ``prefix``                |
 +---------------------------------------+---------------------+------------------------------+
 | ``-DCMAKE_BUILD_TYPE=type``           | ``release``         | Set to ``debug`` for debug   |
-|                                       |                     | informations                 |
+|                                       |                     | information                  |
 +---------------------------------------+---------------------+------------------------------+
 | ``-DBUILD_SHARED_LIBS=ON|OFF``        | ``OFF``             | Build shared library instead |
 |                                       |                     | of static one.               |
@@ -152,9 +152,6 @@ most important options:
 |                                       |                     | `doxygen`_ to be installed   |
 +---------------------------------------+---------------------+------------------------------+
 | ``-DCHFL_BUILD_TESTS=ON|OFF``         | ``OFF``             | Build the test suite.        |
-+---------------------------------------+---------------------+------------------------------+
-| ``-DCHFL_SYSTEM_NETCDF=ON|OFF``       | ``OFF``             | Use the system-provided      |
-|                                       |                     | netcdf library.              |
 +---------------------------------------+---------------------+------------------------------+
 | ``-DCHFL_SYSTEM_LZMA=ON|OFF``         | ``OFF``             | Use the system-provided      |
 |                                       |                     | lzma library.                |
@@ -177,7 +174,7 @@ Using chemfiles in your project
 
 There are multiple ways to use chemfiles in your own code:
 
-- adding the include path and library manually (in a Makefile, or a Visial Studio project);
+- adding the include path and library manually (in a Makefile, or a Visual Studio project);
 - using the CMake configuration file;
 - including chemfiles inside a CMake based-project.
 
@@ -224,7 +221,7 @@ Including chemfiles as a CMake subproject
 -----------------------------------------
 
 If your project is already using CMake, but you don't want to require your users
-to install chemfiles separatedly, you can use cmake support for external
+to install chemfiles separately, you can use cmake support for external
 projects or subdirectories to include chemfiles sources directly inside your own
-project. All CMake variables controling chemfiles behaviour are prefixed with
+project. All CMake variables controlling chemfiles behavior are prefixed with
 ``CHFL_`` to prevent variable pollution.

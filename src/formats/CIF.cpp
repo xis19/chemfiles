@@ -12,12 +12,12 @@
 #include <string>
 #include <exception>
 
-#include "gemmi/cif.hpp"
-#include "gemmi/elem.hpp"
-#include "gemmi/small.hpp"
-#include "gemmi/smcif.hpp"
-#include "gemmi/cifdoc.hpp"
-#include "gemmi/unitcell.hpp"
+#include <gemmi/cif.hpp>
+#include <gemmi/elem.hpp>
+#include <gemmi/small.hpp>
+#include <gemmi/smcif.hpp>
+#include <gemmi/cifdoc.hpp>
+#include <gemmi/unitcell.hpp>
 
 #include "chemfiles/types.hpp"
 #include "chemfiles/error_fmt.hpp"
@@ -157,12 +157,12 @@ void CIFFormat::write(const Frame& frame) {
         angles = frame.cell().angles();
     }
 
-    file_.print("_cell_length_a {}\n", lengths[0]);
-    file_.print("_cell_length_b {}\n", lengths[1]);
-    file_.print("_cell_length_c {}\n", lengths[2]);
-    file_.print("_cell_angle_alpha {}\n", angles[0]);
-    file_.print("_cell_angle_beta  {}\n", angles[1]);
-    file_.print("_cell_angle_gamma {}\n", angles[2]);
+    file_.print("_cell_length_a {:#}\n", lengths[0]);
+    file_.print("_cell_length_b {:#}\n", lengths[1]);
+    file_.print("_cell_length_c {:#}\n", lengths[2]);
+    file_.print("_cell_angle_alpha {:#}\n", angles[0]);
+    file_.print("_cell_angle_beta  {:#}\n", angles[1]);
+    file_.print("_cell_angle_gamma {:#}\n", angles[2]);
     file_.print("loop_\n");
     file_.print("  _symmetry_equiv_pos_as_xyz\n");
     file_.print("  '+x,+y,+z'\n");

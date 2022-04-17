@@ -17,6 +17,8 @@ ERRORS = 0
 # are allowed
 ALLOWED = [
     "found deprecated configuration file at '{}', please rename it to .chemfiles.toml",
+    "could not find _atom_site.type_symbol in '{}'",
+    "could not find _atom_site.Cartn_x in '{}'",
 ]
 
 
@@ -29,6 +31,10 @@ def error(message):
 def extract_messages(lines, i, has_context):
     if has_context:
         context_start = lines[i].find('"')
+        if context_start == -1:
+            # look at the next line
+            i = i + 1
+            context_start = lines[i].find('"')
         context_stop = lines[i].find('"', context_start + 1)
     else:
         context_stop = -1
@@ -39,18 +45,14 @@ def extract_messages(lines, i, has_context):
         i = i + 1
         start = lines[i].find('"')
         if start == -1:
-            print("warning: could not get the message at {}:{}".format(
-                path, i
-            ))
+            print("warning: could not get the message at {}:{}".format(path, i))
             return ""
 
     stop = lines[i].find('"', start + 1)
     if stop == -1:
-        error("could not get the message end at {}:{}".format(
-            path, i
-        ))
+        error("could not get the message end at {}:{}".format(path, i))
 
-    return lines[i][start + 1:stop]
+    return lines[i][start + 1 : stop]
 
 
 def check_message(path, line, message):
@@ -77,7 +79,7 @@ def check_message(path, line, message):
 
 def check_file(path):
     with codecs.open(path, encoding="utf8") as fd:
-        lines = [l for l in fd]
+        lines = list(fd)
 
     for (i, line) in enumerate(lines):
         # ignore comments
@@ -91,7 +93,7 @@ def check_file(path):
             check_message(path, i, extract_messages(lines, i, has_context=False))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for path in glob.glob(os.path.join(ROOT, "src/*.cpp")):
         check_file(path)
 

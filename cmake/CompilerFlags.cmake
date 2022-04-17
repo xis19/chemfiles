@@ -52,30 +52,14 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
 endif()
 
 if(${EMSCRIPTEN})
-    if("${EMSCRIPTEN_VERSION}" VERSION_LESS "1.39.2")
-        # chemfiles requires a version of emscripten with a fix for
-        # https://github.com/emscripten-core/emscripten/issues/9605
-        message(FATAL_ERROR "emscripten ${EMSCRIPTEN_VERSION} is not supported, chemfiles requires at least 1.39.2")
+    if("${EMSCRIPTEN_VERSION}" VERSION_LESS "2")
+        message(FATAL_ERROR "emscripten ${EMSCRIPTEN_VERSION} is not supported, chemfiles requires version 2 or later")
     endif()
 
-    # setting EMSCRIPTEN_GENERATE_BITCODE_STATIC_LIBRARIES=ON here does not
-    # work, since it will only be taken into account on the next cmake
-    # configuration. So we explicitly run the code guarded by
-    # EMSCRIPTEN_GENERATE_BITCODE_STATIC_LIBRARIES=ON in Emscripten.cmake
-    # platform file.
-    SET(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s DISABLE_EXCEPTION_CATCHING=0")
 
-	SET(CMAKE_C_CREATE_STATIC_LIBRARY "<CMAKE_C_COMPILER> -o <TARGET> <LINK_FLAGS> <OBJECTS>")
-	SET(CMAKE_CXX_CREATE_STATIC_LIBRARY "<CMAKE_CXX_COMPILER> -o <TARGET> <LINK_FLAGS> <OBJECTS>")
-    # --- end EMSCRIPTEN_GENERATE_BITCODE_STATIC_LIBRARIES
-
-    set(EMCC_FLAGS "")
-    set(EMCC_FLAGS "${EMCC_FLAGS} -s DISABLE_EXCEPTION_CATCHING=0")
-    set(EMCC_FLAGS "${EMCC_FLAGS} -s ERROR_ON_UNDEFINED_SYMBOLS=1")
-    set(EMCC_FLAGS "${EMCC_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMCC_FLAGS}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EMCC_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s ERROR_ON_UNDEFINED_SYMBOLS=1")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
 
     find_program(NODE_JS_EXECUTABLE NAMES nodejs node)
     if(NODE_JS_EXECUTABLE)
@@ -125,6 +109,12 @@ if(MSVC)
         string(REGEX REPLACE "/W[0-4]" "/Wall" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     else()
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    endif()
+
+    if (${MSVC_TOOLSET_VERSION} GREATER_EQUAL 141)
+        # supported since MVSC 15.6
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /experimental:external /external:anglebrackets /external:W0")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /experimental:external /external:anglebrackets /external:W0")
     endif()
 
     # Disable other warnings

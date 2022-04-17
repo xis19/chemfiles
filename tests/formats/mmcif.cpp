@@ -2,7 +2,6 @@
 // Copyright (C) Guillaume Fraux and contributors -- BSD license
 
 #include <streambuf>
-#include <fstream>
 
 #include "catch.hpp"
 #include "helpers.hpp"
@@ -11,9 +10,7 @@ using namespace chemfiles;
 
 TEST_CASE("Read files in mmCIF format") {
     SECTION("Read single step") {
-        // This is how I imagine most people will resolve the conflict between
-        // CIF files and mmCIF files.
-        auto file = Trajectory("data/cif/4hhb.cif", 'r', "mmCIF");
+        auto file = Trajectory("data/cif/4hhb.cif");
         Frame frame = file.read();
 
         // If comparing to the RCSB-PDB file,
@@ -88,12 +85,12 @@ TEST_CASE("Read files in mmCIF format") {
     }
 
     SECTION("Check nsteps") {
-        auto file = Trajectory("data/cif/1j8k.cif", 'r', "mmCIF");
+        auto file = Trajectory("data/cif/1j8k.cif");
         CHECK(file.nsteps() == 20);
     }
 
     SECTION("Read next step") {
-        auto file = Trajectory("data/cif/1j8k.cif", 'r', "mmCIF");
+        auto file = Trajectory("data/cif/1j8k.cif");
         auto frame = file.read();
         CHECK(frame.size() == 1402);
 
@@ -105,7 +102,7 @@ TEST_CASE("Read files in mmCIF format") {
     }
 
     SECTION("Read a specific step") {
-        auto file = Trajectory("data/cif/1j8k.cif", 'r', "mmCIF");
+        auto file = Trajectory("data/cif/1j8k.cif");
 
         auto frame = file.read_step(13);
         CHECK(frame.size() == 1402);
@@ -123,7 +120,7 @@ TEST_CASE("Read files in mmCIF format") {
     }
 
     SECTION("Read the entire file") {
-        auto file = Trajectory("data/cif/1j8k.cif", 'r', "mmCIF");
+        auto file = Trajectory("data/cif/1j8k.cif");
         auto frame = file.read();
 
         CHECK(frame.get("name")->as_string() ==
@@ -140,17 +137,12 @@ TEST_CASE("Read files in mmCIF format") {
         CHECK(frame.size() == 1402);
     }
 
-    SECTION("Read a COD file") {
-        auto file = Trajectory("data/cif/1544173.cif", 'r', "mmCIF");
+    SECTION("1AKE") {
+        auto file = Trajectory("data/cif/1ake.cif.gz");
         REQUIRE(file.nsteps() == 1);
 
         auto frame = file.read();
-        CHECK(frame.size() == 50);
-
-        auto positions = frame.positions();
-        CHECK(approx_eq(positions[0], Vector3D( -0.428, 5.427, 11.536), 1e-3));
-        CHECK(approx_eq(positions[1], Vector3D( -0.846, 4.873, 12.011), 1e-3));
-        CHECK(approx_eq(positions[10],Vector3D(  2.507, 4.442, 8.863), 1e-3));
+        CHECK(frame.size() == 3816);
     }
 }
 
@@ -214,21 +206,15 @@ TEST_CASE("Write mmCIF file") {
 
     frame.positions()[0] = {4.0, 5.0, 6.0};
     file.write(frame);
-
     file.close();
-    std::ifstream checking(tmpfile);
-    std::string content((std::istreambuf_iterator<char>(checking)),
-                         std::istreambuf_iterator<char>());
+
+    auto content = read_text_file(tmpfile);
     CHECK(EXPECTED_CONTENT == content);
 }
 
 TEST_CASE("Read and write files in memory") {
     SECTION("Reading from memory") {
-
-        std::ifstream checking("data/cif/1j8k.cif");
-        std::vector<char> content((std::istreambuf_iterator<char>(checking)),
-            std::istreambuf_iterator<char>());
-
+        auto content = read_text_file("data/cif/1j8k.cif");
         auto file = Trajectory::memory_reader(content.data(), content.size(), "mmCIF");
 
         auto frame = file.read_step(13);

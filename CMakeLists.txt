@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 2.8.12)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/InitRules.cmake")
 
+project(chemfiles C CXX)
+
 if(NOT "${LAST_CMAKE_VERSION}" VERSION_EQUAL ${CMAKE_VERSION})
     set(LAST_CMAKE_VERSION ${CMAKE_VERSION} CACHE INTERNAL "Last version of cmake used to configure")
     if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
         message(STATUS "Running CMake version ${CMAKE_VERSION}")
+
+        math(EXPR POINTER_SIZE "${CMAKE_SIZEOF_VOID_P} * 8")
+        message(STATUS "Compiling to ${POINTER_SIZE}-bit code")
     endif()
 endif()
-
-project(chemfiles C CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 if (POLICY CMP0042)
@@ -28,7 +31,6 @@ string(STRIP ${CHEMFILES_VERSION} CHEMFILES_VERSION)
 string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" CHEMFILES_VERSION_MAJOR "${CHEMFILES_VERSION}")
 string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" CHEMFILES_VERSION_MINOR "${CHEMFILES_VERSION}")
 string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" CHEMFILES_VERSION_PATCH "${CHEMFILES_VERSION}")
-set(CHEMFILES_VERSION_SHORT "${CHEMFILES_VERSION_MAJOR}.${CHEMFILES_VERSION_MINOR}.${CHEMFILES_VERSION_PATCH}")
 
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
 
@@ -37,7 +39,6 @@ option(CHFL_BUILD_DOCUMENTATION "Build the documentation." OFF)
 option(CHFL_USE_WARNINGS "Compile the code with warnings (default in debug mode)" OFF)
 option(CHFL_USE_CLANG_TIDY "Compile the code with clang-tidy warnings" OFF)
 option(CHFL_USE_INCLUDE_WHAT_YOU_USE "Compile the code with include-what-you-use warnings" OFF)
-option(CHFL_SYSTEM_NETCDF "Use the system NetCDF instead of the internal one" OFF)
 option(CHFL_SYSTEM_ZLIB "Use the system zlib instead of the internal one" OFF)
 option(CHFL_SYSTEM_LZMA "Use the system lzma instead of the internal one" OFF)
 option(CHFL_SYSTEM_BZIP2 "Use the system bzip2 instead of the internal one" OFF)
@@ -45,8 +46,8 @@ option(CHFL_SYSTEM_BZIP2 "Use the system bzip2 instead of the internal one" OFF)
 option(CHFL_BUILD_DOCTESTS "Build documentation tests as well as unit tests." ON)
 
 set(LIB_INSTALL_DIR "lib" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install libraries")
-set(BIN_INSTALL_DIR "bin" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install headers")
-set(INCLUDE_INSTALL_DIR "include" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install DLL/binaries")
+set(BIN_INSTALL_DIR "bin" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install DLL/binaries")
+set(INCLUDE_INSTALL_DIR "include" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install headers")
 
 mark_as_advanced(CHFL_BUILD_DOCTESTS)
 
@@ -139,14 +140,17 @@ set(CHEMFILES_OBJECTS
     ${ZLIB_OBJECTS}
     ${LZMA_OBJECTS}
     ${BZIP2_OBJECTS}
-    ${NETCDF_OBJECTS}
 )
 
 # Add the main chemfiles library
 add_library(chemfiles ${CHEMFILES_OBJECTS})
 
-set_property(TARGET chemfiles PROPERTY VERSION ${CHEMFILES_VERSION_SHORT})
-set_property(TARGET chemfiles PROPERTY SOVERSION ${CHEMFILES_VERSION_SHORT})
+set_target_properties(chemfiles PROPERTIES
+    VERSION "${CHEMFILES_VERSION_MAJOR}.${CHEMFILES_VERSION_MINOR}.${CHEMFILES_VERSION_PATCH}"
+    # This needs to be the part of the version which matter for backward
+    # compatibility, so "major.minor" until 1.0 and then "major" only
+    SOVERSION "${CHEMFILES_VERSION_MAJOR}.${CHEMFILES_VERSION_MINOR}"
+)
 
 target_include_directories(chemfiles PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -155,7 +159,6 @@ target_include_directories(chemfiles PUBLIC
 )
 
 target_link_libraries(chemfiles
-    ${NETCDF_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${LIBLZMA_LIBRARY}
     ${BZIP2_LIBRARIES}
@@ -199,9 +202,9 @@ configure_file(
 
 install(TARGETS chemfiles
     EXPORT chemfiles-targets
-    LIBRARY DESTINATION ${LIB_INSTALL_DIR} COMPONENT Runtime
-    ARCHIVE DESTINATION ${LIB_INSTALL_DIR} COMPONENT Development
-    RUNTIME DESTINATION ${BIN_INSTALL_DIR} COMPONENT Runtime
+    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
 )
 
 include(CMakePackageConfigHelpers)

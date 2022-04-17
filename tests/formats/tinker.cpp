@@ -1,8 +1,5 @@
 // Chemfiles, a modern library for chemistry file reading and writing
 // Copyright (C) Guillaume Fraux and contributors -- BSD license
-
-#include <fstream>
-
 #include "catch.hpp"
 #include "helpers.hpp"
 #include "chemfiles.hpp"
@@ -61,7 +58,7 @@ TEST_CASE("Read files in Tinker XYZ format") {
 
         CHECK(topology[0].get("atom_type")->as_double() == 24);
         CHECK(topology[154].get("atom_type")->as_double() == 24);
-		
+
         CHECK(topology.bonds().size() == 106);
         for (size_t i = 0; i < frame.size(); i += 2) {
             CHECK(contains_bond(topology, {i, i + 1}));
@@ -115,18 +112,14 @@ R"(4 written by the chemfiles library
     file.write(frame);
     file.close();
 
-    std::ifstream checking(tmpfile);
-    std::string content((std::istreambuf_iterator<char>(checking)),
-                         std::istreambuf_iterator<char>());
+    auto content = read_text_file(tmpfile);
     CHECK(content == expected_content);
 }
 
 
 TEST_CASE("Read and write files in memory") {
     SECTION("Reading from memory") {
-        std::ifstream checking("data/tinker/nitrogen.arc");
-        std::vector<char> content((std::istreambuf_iterator<char>(checking)),
-            std::istreambuf_iterator<char>());
+        auto content = read_text_file("data/tinker/nitrogen.arc");
 
         auto file = Trajectory::memory_reader(content.data(), content.size(), "Tinker");
         REQUIRE(file.nsteps() == 50);
@@ -142,7 +135,7 @@ TEST_CASE("Read and write files in memory") {
         auto& topology = frame.topology();
         CHECK(topology[0].name() == "N");
         CHECK(topology[154].name() == "N");
-		
+
         CHECK(topology[0].get("atom_type")->as_double() == 24);
         CHECK(topology[154].get("atom_type")->as_double() == 24);
 

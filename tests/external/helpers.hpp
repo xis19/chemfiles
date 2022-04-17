@@ -5,6 +5,8 @@
 #define CHEMFILES_TESTS_HELPERS_HPP
 
 #include <string>
+#include <vector>
+#include <cstdint>
 
 namespace chemfiles {
     class Vector3D;
@@ -16,7 +18,7 @@ bool approx_eq(const chemfiles::Matrix3D& lhs, const chemfiles::Matrix3D& rhs, d
 bool approx_eq(double a, double b, double tolerance=1e-15);
 
 // Check if the current test is running under both valgrind and Travis
-bool is_valgrind_and_travis();
+bool is_valgrind_and_ci();
 
 /// A temporary file path with an user specified extension, automatically
 /// deleted at scope exit.
@@ -41,6 +43,12 @@ private:
 /// copy the file at `src` to `dst`
 void copy_file(std::string src, std::string dst);
 
+/// get the content of the file at `path` as a vector of bytes
+std::vector<uint8_t> read_binary_file(std::string path);
+
+/// get the content of the file at `path` as a string
+std::string read_text_file(std::string path);
+
 // On Windows, disable the "Application error" dialog box, because it
 // requires an human intervention, and there is no one on Appveyor.
 //
@@ -52,7 +60,10 @@ void silent_crash_handlers();
 /// all C++ allocations.
 void fail_next_allocation();
 
-// Check return status of C API functions
+/// Check return status of C API functions
 #define CHECK_STATUS(expr) CHECK(expr == CHFL_SUCCESS)
+
+/// run the given command using the system shell, and return the standard output
+std::string run_process(std::string command);
 
 #endif
